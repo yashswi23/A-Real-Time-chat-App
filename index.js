@@ -8,9 +8,10 @@ const server = createServer(app);
 const io = new Server(server);
 app.use(express.json());
 const dir_name = dirname(fileURLToPath(import.meta.url));
-app.get("/",(req,res)=>{
-    res.sendFile(join(dir_name,'index.html'));
-})
+app.get("/", (req, res) => {
+    res.sendFile(join(dir_name, 'public/index.html'));
+});
+
 // io.on('connection',(socket)=>{
 //     console.log('a user connected');
 //     socket.on('disconnect',()=>{

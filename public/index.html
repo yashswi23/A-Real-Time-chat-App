@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Split Screen Chat</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: #1e1e2f;
+      color: #f1f1f1;
+      display: flex;
+      height: 100vh;
+    }
+
+    .pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #2e2e3e;
+    }
+
+    .pane:last-child {
+      border-right: none;
+    }
+
+    .messages {
+      list-style-type: none;
+      margin: 0;
+      padding: 1rem;
+      flex-grow: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .messages > li {
+      background: #2e2e3e;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      max-width: 80%;
+      word-wrap: break-word;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .messages > li:nth-child(odd) {
+      align-self: flex-start;
+      background: #3a3a4e;
+    }
+
+    .messages > li:nth-child(even) {
+      align-self: flex-end;
+      background: #4e4e60;
+    }
+
+    .form {
+      display: flex;
+      padding: 0.75rem;
+      background: #12121c;
+      border-top: 1px solid #2e2e3e;
+    }
+
+    .input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: none;
+      border-radius: 25px;
+      font-size: 1rem;
+      outline: none;
+      background: #2e2e3e;
+      color: #fff;
+    }
+
+    .form > button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 0 1.25rem;
+      margin-left: 0.5rem;
+      border-radius: 25px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s ease-in-out;
+    }
+
+    .form > button:hover {
+      background: #0056b3;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(5px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="pane" id="user1">
+    <ul class="messages" id="messages1"></ul>
+    <form class="form" id="form1">
+      <input class="input" id="input1" placeholder="User 1 typing..." />
+      <button>Send</button>
+    </form>
+  </div>
+
+  <div class="pane" id="user2">
+    <ul class="messages" id="messages2"></ul>
+    <form class="form" id="form2">
+      <input class="input" id="input2" placeholder="User 2 typing..." />
+      <button>Send</button>
+    </form>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+ <!-- <script src="/socket.io/socket.io.js"></script> -->
+<script>
+  // Create two users with different names
+  const socket1 = io();
+  const socket2 = io();
+
+  const user1 = "User 1";
+  const user2 = "User 2";
+
+  const form1 = document.getElementById("form1");
+  const input1 = document.getElementById("input1");
+  const messages1 = document.getElementById("messages1");
+
+  const form2 = document.getElementById("form2");
+  const input2 = document.getElementById("input2");
+  const messages2 = document.getElementById("messages2");
+
+  // Emit with name
+  form1.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (input1.value) {
+      socket1.emit("chat message", { user: user1, text: input1.value });
+      input1.value = "";
+    }
+  });
+
+  form2.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (input2.value) {
+      socket2.emit("chat message", { user: user2, text: input2.value });
+      input2.value = "";
+    }
+  });
+
+  // Display messages with username
+  function addMessage(element, { user, text }) {
+    const item = document.createElement("li");
+    item.textContent = `${user}: ${text}`;
+    element.appendChild(item);
+    element.scrollTop = element.scrollHeight;
+  }
+
+  socket1.on("chat message", (data) => addMessage(messages1, data));
+  socket2.on("chat message", (data) => addMessage(messages2, data));
+</script>
+
+</body>
+</html>
